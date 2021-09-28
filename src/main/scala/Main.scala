@@ -32,14 +32,17 @@ object Main extends App {
     By.xpath(s"(//$tag[text()='${params.text}'])${params.filter.map(fl => s"[$fl()]").getOrElse("")}")
 
   def clickOnElement(selector: By): Unit = {
-    new WebDriverWait(driver, 5).until(ExpectedConditions.elementToBeClickable(selector)).click()
+    val element = new WebDriverWait(driver, 5)
+      .until(ExpectedConditions.elementToBeClickable(selector))
+    driver.executeScript("arguments[0].scrollIntoView(true);", element)
+    element.click()
   }
 
   case object SelectorParams {
     implicit def apply(text: String): SelectorParams = SelectorParams(text, None)
   }
 
-  case class SelectorParams(text: String, filter: Option[String])  {
+  case class SelectorParams(text: String, filter: Option[String]) {
     def filterBy(filter: String): SelectorParams = SelectorParams(text, Some(filter))
   }
 
@@ -47,8 +50,7 @@ object Main extends App {
     textInTags.foreach(text => {
       val selector = selectorByText(text)
       clickOnElement(selector)
-    }
-    )
+    })
     clickOnElement(By.className("btn-next"))
   }
 
